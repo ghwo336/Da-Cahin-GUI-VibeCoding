@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaBlockChain - Web Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛓️ DaBlockChain</h1>
+            <p class="subtitle">Web-Based Blockchain Visualization</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="wallets">💼 Wallets</button>
+            <button class="tab-btn" data-tab="visualizer">🔗 Chain Visualizer</button>
+            <button class="tab-btn" data-tab="blockchain">⛓️ Blockchain</button>
+            <button class="tab-btn" data-tab="transactions">💸 Transactions</button>
+            <button class="tab-btn" data-tab="mining">⛏️ Mining</button>
+            <button class="tab-btn" data-tab="trace">🔍 Asset Trace</button>
+        </nav>
+
+        <!-- Chain Visualizer Tab -->
+        <div id="visualizer" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>🎮 3D Blockchain Visualizer</h2>
+                    <button onclick="load3DChain()" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div id="chain-canvas-3d" class="chain-canvas-3d">
+                    <p class="loading">Initializing 3D visualization...</p>
+                </div>
+                <div class="controls-info">
+                    <p>🖱️ <strong>클릭:</strong> 블록 상세 정보 보기</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block Info Modal -->
+        <div id="block-modal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeBlockModal()">&times;</span>
+                <div id="modal-block-info"></div>
+            </div>
+        </div>
+
+        <!-- Wallets Tab -->
+        <div id="wallets" class="tab-content active">
+            <div class="card">
+                <h2>Wallet Management</h2>
+                <div class="form-group">
+                    <label for="wallet-name">Wallet Name:</label>
+                    <input type="text" id="wallet-name" placeholder="Enter wallet name">
+                    <button onclick="createWallet()" class="btn btn-primary">Create Wallet</button>
+                    <button onclick="loadWallets()" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Wallet List</h2>
+                <div id="wallet-list" class="table-container">
+                    <p class="loading">Loading wallets...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Balance Information</h2>
+                <div id="balance-info" class="info-box">
+                    <p>Select a wallet to view balance</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blockchain Tab -->
+        <div id="blockchain" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Blockchain Explorer</h2>
+                    <button onclick="loadBlockchain()" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div id="block-list" class="table-container">
+                    <p class="loading">Loading blockchain...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Block Details</h2>
+                <div id="block-details" class="info-box">
+                    <p>Select a block to view details</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div id="transactions" class="tab-content">
+            <div class="card">
+                <h2>Create Transaction</h2>
+                <div class="form-group">
+                    <label>From (Current Wallet):</label>
+                    <p id="tx-from" class="wallet-info">No wallet selected</p>
+
+                    <label for="tx-to">To (Recipient PubKey Hash):</label>
+                    <input type="text" id="tx-to" placeholder="Enter recipient public key hash">
+
+                    <label for="tx-asset">Asset ID:</label>
+                    <input type="text" id="tx-asset" placeholder="Enter asset ID">
+
+                    <label for="tx-portion">Portion (%):</label>
+                    <input type="number" id="tx-portion" min="1" max="100" placeholder="1-100">
+
+                    <button onclick="createTransaction()" class="btn btn-primary">Create Transaction</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Pending Transactions</h2>
+                    <button onclick="loadPendingTxs()" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div id="pending-txs" class="info-box">
+                    <p class="loading">Loading pending transactions...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mining Tab -->
+        <div id="mining" class="tab-content">
+            <div class="card">
+                <h2>Mining Control</h2>
+                <p>Mine a new block with pending transactions</p>
+                <button onclick="startMining()" class="btn btn-success">Start Mining</button>
+                <div id="mining-progress" class="progress-bar" style="display: none;">
+                    <div class="progress-bar-fill"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Mining Log</h2>
+                <div id="mining-log" class="log-box"></div>
+            </div>
+        </div>
+
+        <!-- Asset Trace Tab -->
+        <div id="trace" class="tab-content">
+            <div class="card">
+                <h2>Asset Tracing</h2>
+                <div class="form-group">
+                    <label for="asset-id">Asset ID:</label>
+                    <input type="text" id="asset-id" placeholder="Enter asset ID">
+                    <button onclick="traceAsset()" class="btn btn-primary">Trace Asset</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Asset History</h2>
+                <div id="asset-history" class="info-box">
+                    <p>자산 ID를 입력하여 거래 내역을 확인하세요</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>DaBlockChain Web Interface | Status: <span id="status">Ready</span></p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualizer3d.js') }}"></script>
+    <script>
+        // Track if 3D visualizer has been initialized
+        let visualizer3DInitialized = false;
+
+        // Initialize 3D visualizer when the visualizer tab is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            const visualizerTab = document.querySelector('[data-tab="visualizer"]');
+
+            if (visualizerTab) {
+                visualizerTab.addEventListener('click', function() {
+                    setTimeout(() => {
+                        if (!visualizer3DInitialized && typeof init3DVisualizer !== 'undefined') {
+                            console.log('Initializing 3D visualizer...');
+                            init3DVisualizer();
+                            load3DChain();
+                            visualizer3DInitialized = true;
+                        }
+                    }, 200);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
